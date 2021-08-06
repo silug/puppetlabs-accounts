@@ -21,8 +21,19 @@ class accounts (
   Accounts::Group::Hash     $group_list     = {},
   Accounts::User::Resource  $user_defaults  = {},
   Accounts::User::Hash      $user_list      = {},
-)
-{
-  ensure_resources('group',          $group_list, $group_defaults)
-  ensure_resources('accounts::user', $user_list,  $user_defaults)
+) {
+  $group_list.each |$key, $value| {
+    unless defined(Group[$key]) {
+      group { $key:
+        * => $group_defaults + $value,
+      }
+    }
+  }
+  $user_list.each |$key, $value| {
+    unless defined(Accounts::User[$key]) or defined(User[$key]) {
+      accounts::user { $key:
+        * => $user_defaults + $value,
+      }
+    }
+  }
 }
